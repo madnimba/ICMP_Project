@@ -8,7 +8,7 @@ CLIENT_IP = "127.0.0.1"       # Victim
 SERVER_IP = "127.0.0.1"       # Spoofed for reset attack
 ATTACKER_IP = "192.168.1.1"   # Spoofed router for throughput attack
 SERVER_PORT = 8080
-PORT_RANGE = (50000, 50010)   # Demo range (reduce for speed)
+PORT_RANGE = (32768, 60999)   # Demo range (reduce for speed)
 NEXT_HOP_MTU = 512
 MAX_SEQ = 10000
 

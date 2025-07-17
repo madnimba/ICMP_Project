@@ -17,7 +17,7 @@ def listen_for_attack():
     while True:
         try:
             with open("reduce_mss.flag", "r") as f:
-                BUFFER_SIZE = 472
+                BUFFER_SIZE = 64  # Much smaller buffer to simulate severe impact
                 reduced_mss = True
                 print("[CLIENT] MSS reduced due to ICMP attack simulation!")
                 break
@@ -41,6 +41,11 @@ def start_client():
             if not data:
                 break
             total_bytes += len(data)
+            
+            # Add delay when MSS is reduced to simulate packet processing overhead
+            if reduced_mss:
+                time.sleep(0.001)  # 1ms delay per small packet
+            
             elapsed = time.time() - start_time
             if elapsed >= 2:
                 speed = (total_bytes / elapsed) / 1024
