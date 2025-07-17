@@ -1,27 +1,47 @@
 import socket
 import time
 
-SERVER_IP = "127.0.0.1"  # Change to 10.0.0.1 if needed
+SERVER_IP = "10.0.0.1"     # Match client IP for realistic network simulation
 SERVER_PORT = 8080
 
 def start_server():
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_sock.bind((SERVER_IP, SERVER_PORT))
-    server_sock.listen(1)
-    print(f"[SERVER] Listening on {SERVER_IP}:{SERVER_PORT}")
-
-    conn, addr = server_sock.accept()
-    print(f"[SERVER] Client connected from {addr}")
-
+    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    
     try:
-        message = b"X" * 1024  # 1 KB data chunk
-        while True:
-            conn.sendall(message)
-            time.sleep(0.01)  # Send continuously
-    except BrokenPipeError:
-        print("[SERVER] Connection reset by client.")
+        server_sock.bind((SERVER_IP, SERVER_PORT))
+        server_sock.listen(1)
+        print(f"[SERVER] Listening on {SERVER_IP}:{SERVER_PORT}")
+        print("[SERVER] Waiting for client connection...")
+
+        conn, addr = server_sock.accept()
+        print(f"[SERVER] Client connected from {addr[0]}:{addr[1]}")
+        print(f"[SERVER] Connection established, sending data...")
+
+        try:
+            message = b"X" * 800   # 800 byte chunks - smaller than typical MSS
+            packets_sent = 0
+            while True:
+                conn.sendall(message)
+                packets_sent += 1
+                if packets_sent % 100 == 0:  # Show progress every 100 packets
+                    print(f"[SERVER] Sent {packets_sent} packets ({packets_sent * 0.8:.1f} KB)")
+                time.sleep(0.005)  # Faster sending for better attack detection
+        except BrokenPipeError:
+            print("[SERVER] *** Client disconnected ***")
+        except ConnectionResetError:
+            print("[SERVER] *** Connection reset by client ***")
+        except Exception as e:
+            print(f"[SERVER] Connection error: {e}")
+        finally:
+            conn.close()
+            print("[SERVER] Client connection closed")
+            
+    except OSError as e:
+        print(f"[SERVER] Server error: {e}")
+        if "Cannot assign requested address" in str(e):
+            print("[SERVER] Tip: You may need to add IP alias: sudo ip addr add 10.0.0.1/32 dev lo")
     finally:
-        conn.close()
         server_sock.close()
 
 if __name__ == "__main__":

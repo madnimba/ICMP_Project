@@ -1,6 +1,3 @@
-# ICMP Attack Project - Flag files
-reduce_mss.flag
-
 # Python
 __pycache__/
 *.py[cod]
