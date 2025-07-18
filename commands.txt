@@ -49,3 +49,15 @@ sudo ip netns exec client ping 10.0.0.1 -c 3
 
 sudo ip netns exec server python3 server.py
 sudo ip netns exec client python3 client.py
+
+
+
+
+
+
+
+
+
+##to check the packets
+sudo ip netns exec client tcpdump -i veth-client icmp -v
+(the packets are received by kerel)

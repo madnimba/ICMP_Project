@@ -11,6 +11,8 @@ def start_client():
     # Enable socket options to receive ICMP errors and better detect changes
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
+    # Note: Removed explicit binding - let kernel choose interface
+    
     # Enable receiving of ICMP errors for this socket
     try:
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_RECVERR, 1)

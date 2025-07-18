@@ -1,0 +1,81 @@
+adibah@adibah:~/ICMP_Project$ ip netns list
+client (id: 1)
+server (id: 0)
+
+adibah@adibah:~/ICMP_Project$ sudo ip netns exec client ip link show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+7: veth-client@if8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
+    link/ether 72:00:d5:4d:e9:4f brd ff:ff:ff:ff:ff:ff link-netns server
+
+adibah@adibah:~/ICMP_Project$ sudo ip netns exec client ss -tn | grep 8080
+FIN-WAIT-2 0      0           10.0.0.2:34019     10.0.0.1:8080
+ESTAB      0      0           10.0.0.2:46619     10.0.0.1:8080
+
+
+adibah@adibah:~/ICMP_Project$ sudo ip netns exec client ip route
+10.0.0.0/24 dev veth-client proto kernel scope link src 10.0.0.2 
+
+
+
+--> the firewall is not blocking ICMP packets
+adibah@adibah:~/ICMP_Project$ sudo iptables -L -v -n
+Chain INPUT (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+
+Chain FORWARD (policy DROP 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 DOCKER-USER  all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+    0     0 DOCKER-ISOLATION-STAGE-1  all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  *      docker0  0.0.0.0/0            0.0.0.0/0            ctstate RELATED,ESTABLISHED
+    0     0 DOCKER     all  --  *      docker0  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  docker0 !docker0  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  docker0 docker0  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  *      br-c3b618fc984f  0.0.0.0/0            0.0.0.0/0            ctstate RELATED,ESTABLISHED
+    0     0 DOCKER     all  --  *      br-c3b618fc984f  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  br-c3b618fc984f !br-c3b618fc984f  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  br-c3b618fc984f br-c3b618fc984f  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  *      br-68d943776742  0.0.0.0/0            0.0.0.0/0            ctstate RELATED,ESTABLISHED
+    0     0 DOCKER     all  --  *      br-68d943776742  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  br-68d943776742 !br-68d943776742  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  br-68d943776742 br-68d943776742  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  *      br-474dc5565332  0.0.0.0/0            0.0.0.0/0            ctstate RELATED,ESTABLISHED
+    0     0 DOCKER     all  --  *      br-474dc5565332  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  br-474dc5565332 !br-474dc5565332  0.0.0.0/0            0.0.0.0/0           
+    0     0 ACCEPT     all  --  br-474dc5565332 br-474dc5565332  0.0.0.0/0            0.0.0.0/0           
+
+Chain OUTPUT (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+
+Chain DOCKER (4 references)
+ pkts bytes target     prot opt in     out     source               destination         
+
+Chain DOCKER-ISOLATION-STAGE-1 (1 references)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 DOCKER-ISOLATION-STAGE-2  all  --  docker0 !docker0  0.0.0.0/0            0.0.0.0/0           
+    0     0 DOCKER-ISOLATION-STAGE-2  all  --  br-c3b618fc984f !br-c3b618fc984f  0.0.0.0/0            0.0.0.0/0           
+    0     0 DOCKER-ISOLATION-STAGE-2  all  --  br-68d943776742 !br-68d943776742  0.0.0.0/0            0.0.0.0/0           
+    0     0 DOCKER-ISOLATION-STAGE-2  all  --  br-474dc5565332 !br-474dc5565332  0.0.0.0/0            0.0.0.0/0           
+    0     0 RETURN     all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+
+Chain DOCKER-ISOLATION-STAGE-2 (4 references)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 DROP       all  --  *      docker0  0.0.0.0/0            0.0.0.0/0           
+    0     0 DROP       all  --  *      br-c3b618fc984f  0.0.0.0/0            0.0.0.0/0           
+    0     0 DROP       all  --  *      br-68d943776742  0.0.0.0/0            0.0.0.0/0           
+    0     0 DROP       all  --  *      br-474dc5565332  0.0.0.0/0            0.0.0.0/0           
+    0     0 RETURN     all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+
+Chain DOCKER-USER (1 references)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 RETURN     all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+
+
+adibah@adibah:~/ICMP_Project$ sysctl net.ipv4.icmp_ignore_bogus_error_responses
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+
+-->tried to fix this by   -- sudo sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=0
+
+adibah@adibah:~/ICMP_Project$ sudo sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=0
+net.ipv4.icmp_ignore_bogus_error_responses = 0
+--> this also does not work 

