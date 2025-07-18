@@ -1,8 +1,8 @@
 import socket
 import time
 
-SERVER_IP = "10.0.0.1"     # Match client IP for realistic network simulation
-SERVER_PORT = 8080
+SERVER_IP = "10.0.0.1"     
+SERVER_PORT = 8080  ## not sure if server PORT will be available to attacker directly
 
 def start_server():
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

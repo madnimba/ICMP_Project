@@ -1,9 +1,9 @@
 import socket
 import time
 
-SERVER_IP = "10.0.0.1"     # Using different network to make attacks more realistic
+SERVER_IP = "10.0.0.1"     
 SERVER_PORT = 8080
-BUFFER_SIZE = 512          # Smaller buffer to better detect MSS changes
+BUFFER_SIZE = 64          # Smaller buffer to better detect MSS changes
 
 def start_client():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

