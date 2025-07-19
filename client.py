@@ -4,9 +4,14 @@ import time
 SERVER_IP = "10.0.0.1"     
 SERVER_PORT = 8080
 BUFFER_SIZE = 64          # Smaller buffer to better detect MSS changes
+CLIENT_PORT = 55555       # Hardcoded client port for debugging
+CLIENT_SEQ = 123456789    # Hardcoded initial sequence number for debugging
 
 def start_client():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    # Bind to a specific client port for debugging
+    sock.bind(("10.0.0.2", CLIENT_PORT))
     
     # Enable socket options to receive ICMP errors and better detect changes
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -27,6 +32,7 @@ def start_client():
         sock.connect((SERVER_IP, SERVER_PORT))
         print(f"[CLIENT] Connected to {SERVER_IP}:{SERVER_PORT}")
         print(f"[CLIENT] Local port: {sock.getsockname()[1]}")  # Show port for attacker targeting
+        print(f"[CLIENT] Using hardcoded initial sequence number: {CLIENT_SEQ}")
         
         # Try to get initial TCP MSS
         try:
