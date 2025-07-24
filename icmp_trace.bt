@@ -1,0 +1,17 @@
+kprobe:icmp_unreach {
+    $type = arg2; // ICMP Type
+    $code = *(uint8*)(arg3 + 1); // ICMP Code from header
+    printf("\n[ICMP] Handler called\n");
+    printf("  Type: %d  Code: %d\n", $type, $code);
+}
+
+kprobe:tcp_v4_err {
+    printf("\n[TCP] tcp_v4_err invoked!\n");
+
+    // Print ICMP-related TCP error arguments
+    printf("  Error type (ICMP type): %d\n", arg1);
+    printf("  ICMP code: %d\n", arg2);
+
+    // arg3 is usually struct inet_connection_sock pointer
+    printf("  Extra arg: %d\n", arg3);
+}
