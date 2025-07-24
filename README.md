@@ -72,26 +72,6 @@ Choose from the attack menu:
 - Forces MSS reduction by advertising smaller MTU
 - Simulates network path MTU discovery manipulation
 
-## Safety Notes
-
-⚠️ **Educational Purpose Only**
-- This project is for understanding network security vulnerabilities
-- Use only in controlled environments (localhost/lab networks)
-- Do not use against systems you don't own
-
-⚠️ **No System Harm**
-- Attacks only affect the demo TCP connection
-- No permanent system changes
-- Temporary ports are released when connections close
-
-## Cleanup
-
-To reset between tests:
-```bash
-rm -f reduce_mss.flag
-```
-
-Then restart client and server components.
 
 ## Technical Details
 
