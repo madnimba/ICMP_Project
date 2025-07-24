@@ -101,24 +101,6 @@ Then select scanning strategy:
 
 ✅ **Proper Spoofing**: Source IP spoofing simulates real-world attack scenarios
 
-## Safety Notes
-
-⚠️ **Educational Purpose Only**
-- This project demonstrates network security vulnerabilities
-- Use only in controlled environments or lab networks
-- Do not use against systems you don't own
-
-⚠️ **Local Network Only**
-- Uses local IP addresses (10.0.0.1) for safety
-- No external network traffic generated
-- IP alias is temporary and removed on reboot
-
-## Cleanup
-
-To remove the IP alias after testing:
-```bash
-sudo ip addr del 10.0.0.1/32 dev lo
-```
 
 ## Technical Details
 
