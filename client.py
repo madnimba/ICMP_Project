@@ -3,9 +3,9 @@ import time
 
 SERVER_IP = "10.0.0.1"     
 SERVER_PORT = 8080
-BUFFER_SIZE = 64          # Smaller buffer to better detect MSS changes
+BUFFER_SIZE = 1024          # Smaller buffer to better detect MSS changes
 CLIENT_PORT = 55555       # Hardcoded client port for debugging
-CLIENT_SEQ = 123456789    # Hardcoded initial sequence number for debugging
+CLIENT_SEQ = 1234567    # Hardcoded initial sequence number for debugging
 
 def start_client():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

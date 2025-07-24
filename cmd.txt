@@ -1,0 +1,48 @@
+# Add server and client IPs to your loopback interface for simulation
+sudo ip addr add 10.0.0.1/32 dev lo
+sudo ip addr add 10.0.0.2/32 dev lo
+sudo ip addr add 192.168.1.1/32 dev lo
+
+ip addr show lo
+
+
+
+# Disable ICMP ratelimit
+sudo sysctl -w net.ipv4.icmp_ratelimit=0
+# Disable source validation
+sudo sysctl -w net.ipv4.conf.all.rp_filter=0
+# Disable TCP retries (faster termination)
+sudo sysctl -w net.ipv4.tcp_retries1=0
+sudo sysctl -w net.ipv4.tcp_retries2=0
+
+sudo sysctl -w net.ipv4.conf.all.rp_filter=0
+sudo sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=0
+
+
+
+ping -I 192.168.1.1 10.0.0.2 -c 2
+ping -I 10.0.0.2 10.0.0.1 -c 2
+
+
+#doesn't work
+sudo sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=0
+sudo sysctl -w net.ipv4.tcp_abort_on_icmp_err=1
+
+
+#packet tracing
+
+
+sudo bpftrace -e '
+kprobe:ip_local_deliver { printf("IP delivered\n"); }
+kprobe:icmp_unreach { printf("ICMP unreachable handler called\n"); }
+kprobe:tcp_v4_err { printf("TCP error handler invoked\n"); }
+'
+
+sudo bpftrace -e '
+kprobe:icmp_unreach {
+    printf("DEBUG: arg0=%lx arg1=%lx arg2=%lx arg3=%lx arg4=%lx\n", arg0, arg1, arg2, arg3, arg4);
+}'
+
+
+sudo bpftrace icmp_trace.bt
+
