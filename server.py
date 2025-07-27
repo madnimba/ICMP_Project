@@ -19,14 +19,14 @@ def start_server():
         print(f"[SERVER] Connection established, sending data...")
 
         try:
-            message = b"X" * 800  
+            message = b"X" * 32768 
             packets_sent = 0
             while True:
                 conn.sendall(message)
                 packets_sent += 1
                 if packets_sent % 100 == 0:  # Show progress every 100 packets
                     print(f"[SERVER] Sent {packets_sent} packets ({packets_sent * 0.8:.1f} KB)")
-                time.sleep(0.005)  # Faster sending for better attack detection
+                time.sleep(0.01)  # Faster sending for better attack detection
         except BrokenPipeError:
             print("[SERVER] *** Client disconnected ***")
         except ConnectionResetError:
