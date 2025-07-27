@@ -2,7 +2,7 @@ import socket
 import time
 
 SERVER_IP = "10.0.0.1"     
-SERVER_PORT = 8080  ## not sure if server PORT will be available to attacker directly
+SERVER_PORT = 8080  
 
 def start_server():
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,7 +19,7 @@ def start_server():
         print(f"[SERVER] Connection established, sending data...")
 
         try:
-            message = b"X" * 800   # 800 byte chunks - smaller than typical MSS
+            message = b"X" * 800  
             packets_sent = 0
             while True:
                 conn.sendall(message)
