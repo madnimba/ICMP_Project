@@ -5,7 +5,7 @@ import struct
 SERVER_IP = "10.0.0.1"     
 SERVER_PORT = 8080
 BUFFER_SIZE = 1024  
-SEQ_WINDOW = 65535
+SEQ_WINDOW = 1000
 defense_enabled = False
 
 def parse_icmp_error(cmsg_data):
@@ -93,6 +93,7 @@ def start_client():
             except BlockingIOError:
                 # No data available, check error queue
                 try:
+                    print("[CLIENT] Checking error queue...")
                     msg, ancdata, flags, addr = sock.recvmsg(1024, socket.CMSG_LEN(512), socket.MSG_ERRQUEUE)
                     for cmsg_level, cmsg_type, cmsg_data in ancdata:
                         if cmsg_level == socket.IPPROTO_IP:
