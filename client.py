@@ -3,14 +3,17 @@ import time
 
 SERVER_IP = "10.0.0.1"     
 SERVER_PORT = 8080
-BUFFER_SIZE = 1024          # Smaller buffer to better detect MSS changes
-CLIENT_PORT = 55555       # Hardcoded client port for debugging
+BUFFER_SIZE = 1024          
+CLIENT_PORT = 55555      
 
 def start_client():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
     # Bind to a specific client port for debugging
-    sock.bind(("10.0.0.2", CLIENT_PORT))
+    #sock.bind(("10.0.0.2", CLIENT_PORT))
+    # Do NOT bind — let the OS handle it
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     
     # Enable socket options to receive ICMP errors and better detect changes
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -42,7 +45,7 @@ def start_client():
         total_bytes = 0
         start_time = time.time()
         packet_count = 0   
-             
+
         print("[CLIENT] Starting download...")
         
         while True:
