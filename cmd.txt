@@ -5,8 +5,6 @@ sudo ip addr add 192.168.1.1/32 dev lo
 
 ip addr show lo
 
-
-
 # Disable ICMP ratelimit
 sudo sysctl -w net.ipv4.icmp_ratelimit=0
 # Disable source validation
@@ -18,15 +16,8 @@ sudo sysctl -w net.ipv4.tcp_retries2=0
 sudo sysctl -w net.ipv4.conf.all.rp_filter=0
 sudo sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=0
 
-
-
 ping -I 192.168.1.1 10.0.0.2 -c 2
 ping -I 10.0.0.2 10.0.0.1 -c 2
-
-#to reset the mss after attack
-sudo ip route flush cache
-
-
 
 #packet tracing
 
@@ -44,4 +35,13 @@ kprobe:icmp_unreach {
 
 
 sudo bpftrace icmp_trace.bt
+
+
+#to reset the mss after attack
+sudo ip route flush cache
+
+python3 server.py
+python3 client.py
+sudo python3 attacker.py
+
 

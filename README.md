@@ -79,7 +79,7 @@ Then select scanning strategy:
 
 ## Attack Mechanism
 
-### Connection Reset Attack (ICMP Type 3, Code 1)
+### Connection Reset Attack (ICMP Type 3, Code 3)
 - Sends ICMP Destination Unreachable packets to client
 - Spoofs source IP as the server (10.0.0.1)  
 - Includes embedded TCP header with guessed sequence numbers
