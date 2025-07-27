@@ -11,7 +11,7 @@ ATTACKER_IP = "192.168.1.1"   # Spoofed router IP for throughput attack
 SERVER_PORT = 8080
 NEXT_HOP_MTU = 512
 MAX_SEQ = 4294967295          # Full 32-bit sequence number range
-icmp_reset_code = 1
+icmp_reset_code = 3
 
 def get_port_scan_strategy():
     """Return port scanning strategy for blind attack"""
