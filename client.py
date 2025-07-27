@@ -10,9 +10,9 @@ def start_client():
     #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
     # Bind to a specific client port for debugging
-    #sock.bind(("10.0.0.2", CLIENT_PORT))
+    sock.bind(("10.0.0.2", CLIENT_PORT))
     # Do NOT bind — let the OS handle it
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     
     # Enable socket options to receive ICMP errors and better detect changes
