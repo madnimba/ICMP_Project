@@ -1,9 +1,24 @@
 import socket
 import time
+import struct
 
 SERVER_IP = "10.0.0.1"     
 SERVER_PORT = 8080
-BUFFER_SIZE = 1024               
+BUFFER_SIZE = 1024  
+SEQ_WINDOW = 65535
+defense_enabled = False
+
+def parse_icmp_error(cmsg_data):
+    """Parse ICMP error message from ancillary data"""
+    # This is highly dependent on platform (Linux uses sock_extended_err)
+    # Format: struct sock_extended_err (32 bytes) + optional offender sockaddr
+    ee_errno, ee_origin, ee_type, ee_code, ee_pad, ee_info, ee_data = struct.unpack("=BBBxII", cmsg_data[:12])
+    return ee_type, ee_code
+
+def is_seq_valid(seq, expected_seq):
+    """Check if ICMP-embedded seq is within a valid window"""
+    return abs(seq - expected_seq) <= SEQ_WINDOW
+
 
 def start_client():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -20,6 +35,12 @@ def start_client():
         sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     except:
         pass
+
+    defense_enabled = input("Enable defense? (y/n): ")
+    if defense_enabled == "y":
+        defense_enabled = True
+    else:
+        defense_enabled = False
     
     try:
         sock.connect((SERVER_IP, SERVER_PORT))
@@ -35,9 +56,11 @@ def start_client():
         
         total_bytes = 0
         start_time = time.time()
-        packet_count = 0   
+        packet_count = 0 
+        expected_seq = 0
 
         print("[CLIENT] Starting download...")
+        sock.setblocking(False)
         
         while True:
             try:
@@ -49,6 +72,7 @@ def start_client():
                 packet_size = len(data)
                 total_bytes += packet_size
                 packet_count += 1
+                expected_seq += packet_size
                 
                 elapsed = time.time() - start_time
                 if elapsed >= 2:
@@ -66,6 +90,29 @@ def start_client():
                     packet_count = 0
                     start_time = time.time()
                     
+            except BlockingIOError:
+                # No data available, check error queue
+                try:
+                    msg, ancdata, flags, addr = sock.recvmsg(1024, socket.CMSG_LEN(512), socket.MSG_ERRQUEUE)
+                    for cmsg_level, cmsg_type, cmsg_data in ancdata:
+                        if cmsg_level == socket.IPPROTO_IP:
+                            icmp_type, icmp_code = parse_icmp_error(cmsg_data)
+                            print(f"[CLIENT] ICMP Received: Type={icmp_type}, Code={icmp_code}")
+
+                            if defense_enabled:
+                                # Extract sequence number from ICMP payload
+                                # Skip IP(20 bytes) + TCP header (20 bytes) to find seq
+                                if len(msg) >= 24:
+                                    embedded_seq = struct.unpack("!I", msg[16:20])[0]
+                                    if not is_seq_valid(embedded_seq, expected_seq):
+                                        print(f"[DEFENSE] Dropped ICMP (Seq {embedded_seq} out of window)")
+                                        continue
+                                print("[DEFENSE] Accepted ICMP")
+                            else:
+                                print("[DEFENSE] Disabled, ICMP applied")
+
+                except BlockingIOError:
+                    pass
             except socket.error as e:
                 print(f"[CLIENT] Socket error: {e}")
                 if "Connection reset" in str(e):
