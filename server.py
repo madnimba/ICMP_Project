@@ -23,11 +23,31 @@ def start_server():
 
             while True:
                 mss = conn.getsockopt(socket.IPPROTO_TCP, socket.TCP_MAXSEG)
-                print(f"[SERVER] Current TCP MSS: {mss} bytes")
-                # Send exactly one MSS-sized message
-                data = b'X' * mss
-                conn.sendall(data)
-                time.sleep(0.05)  # Very short delay to allow continuous data flow
+                #print(f"[SERVER] Current TCP MSS: {mss} bytes")
+                data = conn.recv(mss if mss > 0 else 32768)
+                if not data:
+                    break
+                    
+                packet_size = len(data)
+                total_bytes += packet_size
+                packet_count += 1
+                expected_seq += packet_size
+                
+                elapsed = time.time() - start_time
+                if elapsed >= 2:
+                    speed = (total_bytes / elapsed) / 1024
+                    avg_packet_size = total_bytes / packet_count if packet_count > 0 else 0                                      
+                    try:
+                        current_mss = conn.getsockopt(socket.IPPROTO_TCP, socket.TCP_MAXSEG)
+                    except:
+                        current_mss = "unknown"
+
+                    print(f"[SERVER] Speed: {speed:.2f} KB/s | Avg: {avg_packet_size:.0f}B | MSS: {current_mss}")
+
+                    # Reset counters
+                    total_bytes = 0
+                    packet_count = 0
+                    start_time = time.time()
 
         except BrokenPipeError:
             print("[SERVER] *** Client disconnected ***")

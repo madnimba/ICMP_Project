@@ -7,6 +7,7 @@ SERVER_PORT = 8080
 BUFFER_SIZE = 64 
 SEQ_WINDOW = 65535
 defense_enabled = False
+import os
 
 def parse_icmp_error(cmsg_data):
     """Parse ICMP error message from ancillary data"""
@@ -65,30 +66,13 @@ def start_client():
         while True:
             try:
                 # Use recv to get available data
-                data = sock.recv(mss if mss > 0 else BUFFER_SIZE)
-                if not data:
-                    break
-                    
-                packet_size = len(data)
-                total_bytes += packet_size
-                packet_count += 1
-                expected_seq += packet_size
                 
-                elapsed = time.time() - start_time
-                if elapsed >= 2:
-                    speed = (total_bytes / elapsed) / 1024
-                    avg_packet_size = total_bytes / packet_count if packet_count > 0 else 0                                      
-                    try:
-                        current_mss = sock.getsockopt(socket.IPPROTO_TCP, socket.TCP_MAXSEG)
-                    except:
-                        current_mss = "unknown"                   
-                    
-                    print(f"[CLIENT] Speed: {speed:.2f} KB/s | Avg: {avg_packet_size:.0f}B | MSS: {current_mss}")
-                    
-                    # Reset counters
-                    total_bytes = 0
-                    packet_count = 0
-                    start_time = time.time()
+                mss = sock.getsockopt(socket.IPPROTO_TCP, socket.TCP_MAXSEG)
+                data = os.urandom(mss)  # Random data matching current MSS
+                sock.sendall(data)
+                time.sleep(0.1)
+            except KeyboardInterrupt:
+                break
                     
             except BlockingIOError:
                 # No data available, check error queue
