@@ -36,7 +36,7 @@ def start_server():
                     if packets_sent % 100 == 0:
                         print(f"[SERVER] Sent {packets_sent} packets ({packets_sent * mss / 1024:.1f} KB)")
 
-                    time.sleep(0.05)  # Very short delay to allow continuous data flow
+                    time.sleep(0.5)  # Very short delay to allow continuous data flow
 
         except BrokenPipeError:
             print("[SERVER] *** Client disconnected ***")
