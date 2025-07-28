@@ -266,10 +266,9 @@ if __name__ == "__main__":
     print("Attack Types:")
     print("1. Connection Reset Attack (ICMP Type 3, Code 3)")
     print("2. Throughput Reduction Attack (ICMP Type 3, Code 4)") 
-    print("3. Both Attacks")
-    
-    choice = input("Select attack type (1-3): ")
-    
+
+    choice = input("Select attack type (1-2): ")
+
     # Get scanning strategy for blind attack
     strategy, strategy_name = get_port_scan_strategy()
     print(f"[ATTACKER] Using {strategy_name}")
@@ -279,11 +278,6 @@ if __name__ == "__main__":
         icmp_connection_reset(sock, strategy)
     elif choice == "2":
         icmp_throughput_reduction(sock, strategy)
-    elif choice == "3":
-        print("[ATTACKER] Running combined attack...")
-        icmp_throughput_reduction(sock, strategy)
-        time.sleep(5)
-        icmp_connection_reset(sock, strategy)
     else:
         print("Invalid choice")
     

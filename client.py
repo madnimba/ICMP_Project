@@ -36,11 +36,11 @@ def start_client():
     except:
         pass
 
-    defense_enabled = input("Enable defense? (y/n): ")
-    if defense_enabled == "y":
-        defense_enabled = True
-    else:
-        defense_enabled = False
+    # defense_enabled = input("Enable defense? (y/n): ")
+    # if defense_enabled == "y":
+    #     defense_enabled = True
+    # else:
+    #     defense_enabled = False
     
     try:
         sock.connect((SERVER_IP, SERVER_PORT))
