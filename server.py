@@ -20,6 +20,10 @@ def start_server():
 
         try:
             packets_sent = 0
+            total_bytes = 0
+            start_time = time.time()
+            packet_count = 0 
+            expected_seq = 0
 
             while True:
                 mss = conn.getsockopt(socket.IPPROTO_TCP, socket.TCP_MAXSEG)
