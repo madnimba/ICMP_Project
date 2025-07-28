@@ -26,7 +26,7 @@ def start_server():
                 packets_sent += 1
                 if packets_sent % 100 == 0:  # Show progress every 100 packets
                     print(f"[SERVER] Sent {packets_sent} packets ({packets_sent * 0.8:.1f} KB)")
-                time.sleep(0.01)  # Faster sending for better attack detection
+                time.sleep(0.05)  # Faster sending for better attack detection
         except BrokenPipeError:
             print("[SERVER] *** Client disconnected ***")
         except ConnectionResetError:

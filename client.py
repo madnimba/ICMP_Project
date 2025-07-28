@@ -4,7 +4,7 @@ import struct
 
 SERVER_IP = "10.0.0.1"     
 SERVER_PORT = 8080
-BUFFER_SIZE = 1024  
+BUFFER_SIZE = 64 
 SEQ_WINDOW = 65535
 defense_enabled = False
 
