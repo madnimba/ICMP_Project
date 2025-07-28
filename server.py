@@ -21,22 +21,13 @@ def start_server():
         try:
             packets_sent = 0
 
-            # Get current MSS from the TCP socket
             mss = conn.getsockopt(socket.IPPROTO_TCP, socket.TCP_MAXSEG)
-            print(f"[SERVER] Detected MSS: {mss} bytes")
+            print(f"[SERVER] Current TCP MSS: {mss} bytes")
 
-            # Prepare a long message to split
-            message = b"X" * 32768  
-
-            while True:
-                for i in range(0, len(message), mss):
-                    conn.sendall(message[i:i + mss])
-                    packets_sent += 1
-
-                    if packets_sent % 100 == 0:
-                        print(f"[SERVER] Sent {packets_sent} packets ({packets_sent * mss / 1024:.1f} KB)")
-
-                    time.sleep(0.5)  # Very short delay to allow continuous data flow
+            # Send exactly one MSS-sized message
+            data = b'X' * mss
+            conn.sendall(data)
+            time.sleep(0.05)  # Very short delay to allow continuous data flow
 
         except BrokenPipeError:
             print("[SERVER] *** Client disconnected ***")
