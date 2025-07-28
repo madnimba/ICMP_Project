@@ -83,7 +83,7 @@ def start_client():
                     except:
                         current_mss = "unknown"                   
                     
-                    print(f"[CLIENT] Speed: {speed:.2f} KB/s | Avg: {avg_packet_size:.0f}B | MSS: {current_mss}")
+                    print(f"[CLIENT] Speed: {speed:.2f} KB/s | Avg: {avg_packet_size:.0f}B ")
                     
                     # Reset counters
                     total_bytes = 0
