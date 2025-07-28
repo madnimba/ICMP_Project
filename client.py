@@ -65,7 +65,7 @@ def start_client():
         while True:
             try:
                 # Use recv to get available data
-                data = sock.recv(BUFFER_SIZE)
+                data = sock.recv(mss if mss > 0 else BUFFER_SIZE)
                 if not data:
                     break
                     
